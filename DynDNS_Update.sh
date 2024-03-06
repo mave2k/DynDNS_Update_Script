@@ -1,15 +1,33 @@
 #!/bin/bash
 
+# TODO
+# make token fetch dynamically
 domains=("kopen.at")
 TOKEN=qmgzvBsRJi2QBRE1RmPspYcwt48X
 
 # What this does
+# - Check if this is Mac or Synology DSM and tweak the commands accordingly
 # - Query DNS Servers of Google for the TXT record
 # - o-o.myaddr.l.google.com: This is a special subdomain provided by Google that returns your public IP address when queried with a TXT record lookup
 # - @ns1.google.com: This specifies the DNS server to be used for the query. In this case, we are using Google's nameserver ns1.google.com
 # - Also remove starting and trailing ""
-ipv4=$(echo "$(dig -4 TXT +short o-o.myaddr.l.google.com @ns1.google.com)" | sed 's/^"//; s/"$//')
-ipv6=$(echo "$(dig -6 TXT +short o-o.myaddr.l.google.com @ns1.google.com)" | sed 's/^"//; s/"$//')
+if [[ $(uname) == "Darwin" ]]; then
+    # Code specific to macOS --> dig is available
+    ipv4=$(echo "$(dig -4 TXT +short o-o.myaddr.l.google.com @ns1.google.com)" | sed 's/^"//; s/"$//')
+    ipv6=$(echo "$(dig -6 TXT +short o-o.myaddr.l.google.com @ns1.google.com)" | sed 's/^"//; s/"$//')
+    echo "This code runs on macOS."
+elif [[ $(uname) == "Linux" ]]; then
+    # Code specific to Syno-DSM --> dig binary taken from the DNS Server package
+    ipv4=$(echo "$(/var/packages/DNSServer/target/bin/dig -4 TXT +short o-o.myaddr.l.google.com @ns1.google.com)" | sed 's/^"//; s/"$//')
+    # Remember: Enable IPv6 on Synology in the Network --> Network Interface --> Manage section first
+    ipv6=$(echo "$(/var/packages/DNSServer/target/bin/dig -6 TXT +short o-o.myaddr.l.google.com @ns1.google.com)" | sed 's/^"//; s/"$//')
+    echo "This code runs on SynoDSM"
+else
+    # Code for other operating systems (optional)
+    echo "This code runs on an unknown operating system."
+    exit 1
+fi
+
 
 echo "Current external IP addresses are:"
 echo "IPv4: " $ipv4
