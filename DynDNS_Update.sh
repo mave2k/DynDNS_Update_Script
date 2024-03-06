@@ -1,8 +1,6 @@
 #!/bin/bash
 
-USER=XXXXXX
-PASSWORD=XXXXXX
-URL1=kopen.at
+domains=("kopen.at")
 TOKEN=qmgzvBsRJi2QBRE1RmPspYcwt48X
 
 # What this does
@@ -13,10 +11,10 @@ TOKEN=qmgzvBsRJi2QBRE1RmPspYcwt48X
 ipv4=$(echo "$(dig -4 TXT +short o-o.myaddr.l.google.com @ns1.google.com)" | sed 's/^"//; s/"$//')
 ipv6=$(echo "$(dig -6 TXT +short o-o.myaddr.l.google.com @ns1.google.com)" | sed 's/^"//; s/"$//')
 
-echo $ipv4 $ipv6 
+# echo $ipv4 $ipv6
 
 # Exiting if ip address is empty
-if [ -z "$ipv4" ] || [ -z "$ipv6" ];then
+if [ -z "$ipv4" ] || [ -z "$ipv6" ]; then
     echo "IP address is empty. Exiting!"
     exit 1
 fi
@@ -28,11 +26,21 @@ if [ "$(head -n 1 address.txt)" == "$ipv4" ] && [ "$(head -n 2 address.txt | tai
 fi
 
 # Update address.txt with new values
-echo "$ipv4" > address.txt
-echo "$ipv6" >> address.txt
+echo "$ipv4" >address.txt
+echo "$ipv6" >>address.txt
 
-#curl --user <your domain>:<your token secret> "https://update.dedyn.io/?myipv4=1.2.3.4&myipv6=fd08::1234"
-curl --user kopen.at:$TOKEN "https://update.dedyn.io/?myipv4=${ipv4}&myipv6=${ipv6}"
+# The Desec Update Command
+# curl --user kopen.at:$TOKEN "https://update.dedyn.io/?myipv4=${ipv4}&myipv6=${ipv6}"
 
+# Loop through each domain in the array
+for domain in "${domains[@]}"; do
+    # Construct the full URL with the current domain
+    url="https://update.dedyn.io/?myipv4=${ipv4}&myipv6=${ipv6}"
+    url="${url//DOMAIN.COM/$domain}" # Replace placeholder with current domain
+    echo "Executing update for $domain:"
+    echo "Response: "
+    # Execute the curl command with the constructed URL and provided credentials
+    curl --user "$domain:$TOKEN" "$url"
+done
 
-echo $ipv4 $ipv6 
+echo $ipv4 $ipv6
