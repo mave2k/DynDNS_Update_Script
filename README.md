@@ -38,6 +38,7 @@ Add a new line to the file with the following format:
 minute hour day_of_month month day_of_week command
 */5 * * * * your_command --> every 5 mins
 
+
 Replace the following placeholders:
 
 minute: The minute (0-59) when the task should run.
@@ -48,10 +49,14 @@ day_of_week: The day of the week (0-6, where 0 is Sunday) when the task should r
 command: The command you want to run for the cronjob.
 Save the changes and exit the editor.
 
+#minute hour    mday    month   wday    who command
+*/5   *   *   *   *   root    /var/services/homes/mave2k/z_config/custom_url_update/DynDNS_Update.sh
+
 Restart the cron service:
 
 Bash
 sudo systemctl restart crond
+sudo systemctl restart synocrond
 Use code with caution.
 Remember:
 

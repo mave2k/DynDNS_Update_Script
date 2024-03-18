@@ -3,7 +3,7 @@
 # TODO
 # make token fetch dynamically
 domains=("kopen.at")
-TOKEN=qmgzvBsRJi2QBRE1RmPspYcwt48X
+TOKEN=$(head -n 1 address.txt)
 
 # What this does
 # - Check if this is Mac or Synology DSM and tweak the commands accordingly
@@ -40,11 +40,16 @@ if [ -z "$ipv4" ] || [ -z "$ipv6" ]; then
     exit 1
 fi
 
-# Exiting if IP addresses are unchanged
-if [ "$(head -n 1 address.txt)" == "$ipv4" ] && [ "$(head -n 2 address.txt | tail -n 1)" == "$ipv6" ]; then
+# # Exiting if IP addresses are unchanged
+# if [ "$(head -n 1 address.txt)" == "$ipv4" ] && [ "$(head -n 2 address.txt | tail -n 1)" == "$ipv6" ]; then
+#     echo "IP addresses are unchanged. Ending."
+#     exit 0
+# fi
+if [ "$(head -n 2 address.txt | tail -n 1)" == "$ipv4" ] && [ "$(head -n 3 address.txt | tail -n 1)" == "$ipv6" ]; then
     echo "IP addresses are unchanged. Ending."
     exit 0
 fi
+
 
 # The Desec Update Command
 # curl --user kopen.at:$TOKEN "https://update.dedyn.io/?myipv4=${ipv4}&myipv6=${ipv6}"
@@ -65,5 +70,6 @@ for domain in "${domains[@]}"; do
 done
 
 # Update address.txt with new values
-echo "$ipv4" >address.txt
+echo "$TOKEN" > address.txt
+echo "$ipv4" >>address.txt
 echo "$ipv6" >>address.txt
