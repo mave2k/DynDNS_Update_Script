@@ -29,14 +29,14 @@ So steps you need to do are
 
 ### Preparations on your Synology NAS
 
-*Remark: Tested with Synology DSM 7.2.1*
+*Remark*: Tested with Synology DSM 7.2.1
 
 - Enable SSH access in Control Center -> Terminal & SNMP
 - Install the DNS Server package
 
 ### Deploy the Script
 
-Copy the 2 script files to your Synology NAS. You can do this via drag & drop from the Browser UI. 
+Copy the 2 script files to your Synology NAS. You can do this via drag & drop from the Browser UI.
 
 Adapt the Config-Parameters in the `config.sh` file.
 
