@@ -1,9 +1,11 @@
 #!/bin/bash
+# TODO specify config.txt in an absolute path
+source config.sh
 
-# TODO
-# make token fetch dynamically
-domains=("kopen.at")
-TOKEN=$(head -n 1 address.txt)
+echo $TOKEN 
+echo $DOMAINS
+echo $OLD_IPv4
+echo $OLD_IPv6
 
 # What this does
 # - Check if this is Mac or Synology DSM and tweak the commands accordingly
@@ -41,11 +43,10 @@ if [ -z "$ipv4" ] || [ -z "$ipv6" ]; then
 fi
 
 # # Exiting if IP addresses are unchanged
-# if [ "$(head -n 1 address.txt)" == "$ipv4" ] && [ "$(head -n 2 address.txt | tail -n 1)" == "$ipv6" ]; then
-#     echo "IP addresses are unchanged. Ending."
-#     exit 0
-# fi
-if [ "$(head -n 2 address.txt | tail -n 1)" == "$ipv4" ] && [ "$(head -n 3 address.txt | tail -n 1)" == "$ipv6" ]; then
+echo "Old IP4= " $OLD_IPv4
+echo "Old IP6= " $OLD_IPv6
+
+if [ $OLD_IPv4 == $ipv4 ] && [ $OLD_IPv6 == $ipv6 ]; then
     echo "IP addresses are unchanged. Ending."
     exit 0
 fi
@@ -55,7 +56,7 @@ fi
 # curl --user kopen.at:$TOKEN "https://update.dedyn.io/?myipv4=${ipv4}&myipv6=${ipv6}"
 
 # Loop through each domain in the array
-for domain in "${domains[@]}"; do
+for domain in "${DOMAINS[@]}"; do
     # Construct the full URL with the current domain
     url="https://update.dedyn.io/?myipv4=${ipv4}&myipv6=${ipv6}"
     url="${url//DOMAIN.COM/$domain}" # Replace placeholder with current domain
@@ -69,7 +70,8 @@ for domain in "${domains[@]}"; do
     echo ""
 done
 
-# Update address.txt with new values
-echo "$TOKEN" > address.txt
-echo "$ipv4" >>address.txt
-echo "$ipv6" >>address.txt
+# Update config.txt with new values
+echo "TOKEN=\""$TOKEN"\"" > ./config.sh
+echo "DOMAINS=("${DOMAINS[@]}")" >> ./config.sh
+echo "OLD_IPv4=\""$ipv4"\"" >> ./config.sh
+echo "OLD_IPv6=\""$ipv6"\"" >> ./config.sh
