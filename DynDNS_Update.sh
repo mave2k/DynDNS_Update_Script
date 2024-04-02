@@ -1,5 +1,4 @@
 #!/bin/bash
-# TODO specify config.txt in an absolute path
 source config.sh
 
 echo $TOKEN 
