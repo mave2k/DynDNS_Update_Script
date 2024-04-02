@@ -16,7 +16,16 @@ This is a handy little bash script to dynamically update DNS entries for your cu
 
 ### DNS Service that allows for dynamic updating
 
-### Changing the DNS server for your domain
+If you are at a "typical" hoster, like [domainfactory.eu], they will not offer the chance to dynamically update your URL's A or AAAA records with an API. However, *DESEC* ([desec.io]) allows this. All you need to do is create an entry in your hoster's nameserver settings that determines the DESEC-nameservers to be used whenever your domain is being resolved.
+
+At Domainfactory, the menu is *Nameserver Settngs* and the nameservers to be configured are the following:
+
+![Nameserver Setting for external DNS](assets/dns_setting.png)
+
+So steps you need to do are
+
+1. Configure your hoster's nameserver settings so that the DESEC nameservers are used
+2. Configure your URL in your DESEC account
 
 ### Preparations on your Synology NAS
 
@@ -35,9 +44,15 @@ Somewhere in your user's home directory is fine, e.g. `~/url_update/`.
 
 Log in to your Synology NAS via SSH.
 
-Make sure, the `DynDNS_Update.sh` is executable. If it is not, make it executable with
+Make sure, the `DynDNS_Update.sh` is executable. If it is not, make it executable with: `chmod +x DynDNS_Update.sh`
 
-`chmod +x DynDNS_Update.sh`
+### Edit your Synology's Crontab
+
+To make sure, the script checks for a change in your external IPs on a regular basis, you need to schedule the execution in your Synology's crontab.
+
+Connect to your Synology NAS via SSH.
+
+Edit the /etc/crontab file using a text editor like nano or vi (you need administrator privileges): `sudo vi /etc/crontab`
 
 ## What the script does
 
@@ -101,67 +116,19 @@ Lastly, the IP addresses in the `config.sh` are being updated.
 
 Connect to your Synology NAS via SSH.
 
-Edit the /etc/crontab file using a text editor like nano or vi:
+Edit the /etc/crontab file using a text editor like nano or vi: `sudo vi /etc/crontab`
 
-`sudo nano /etc/crontab`
-
-Note: Using sudo is important as the crontab file requires root privileges for modification.
+*Note: Using sudo is important as the crontab file requires root privileges for modification.*
 
 Add a new line to the file with the following format:
 
-minute hour day_of_month month day_of_week command
-*/5* ** * your_command --> every 5 mins
+`*/5 *   *   *   *   your_username   cd ~/url_update/ ./DynDNS_Update.sh`
 
-Replace the following placeholders:
+This line
 
-minute: The minute (0-59) when the task should run.
-hour: The hour (0-23) when the task should run.
-day_of_month: The day of the month (1-31) when the task should run. Use *for all days.
-month: The month (1-12) when the task should run. Use* for all months.
-day_of_week: The day of the week (0-6, where 0 is Sunday) when the task should run. Use * for all days.
-command: The command you want to run for the cronjob.
-Save the changes and exit the editor.
+- runs every 5 minutes
+- under the user identity given in `your_username`
+- sets the working directory to the directory where you copied the script files (e.g. `~/url_update/`)
+- defines the script to be executed
 
-## minute hour    mday    month   wday    who command
-
-*/5*   **   *   root    /var/services/homes/mave2k/z_config/custom_url_update/DynDNS_Update.sh
-
-Restart the cron service:
-
-Bash
-sudo systemctl restart crond
-sudo systemctl restart synocrond
-Use code with caution.
-Remember:
-
-Be cautious when editing the /etc/crontab file, as errors can lead to unexpected behavior.
-Ensure the user under which the script runs has the necessary permissions to execute the commands within the cronjob.
-Consider using the web UI approach for easier management if you're not comfortable with SSH.
-These methods allow you to create cronjobs on your Synology NAS, enabling scheduled execution of various tasks according to your defined schedules.
-
-TODO
-
-In the given situation, file.txt will be created in the root user's home directory, which is typically /root.
-
-Here's why:
-
-Owner of the crontab: The cronjob is owned and executed by the root user, as specified in the crontab configuration.
-Working directory: When a cronjob runs, it switches to the working directory of the user that owns the crontab. In this case, that's /root.
-Relative path in the script: The script uses a relative path (file.txt) to create the file. This means it creates the file relative to the current working directory, which is /root when executed by cron.
-Absolute path solution:
-
-To ensure file.txt is created in the desired directory (e.g., /var/users/home/username), modify the script to use an absolute path for file creation:
-
-Bash
-
-## Replace "username" with the actual username
-
-$variable > /var/users/home/username/file.txt
-Use code with caution.
-Alternative approaches:
-
-Change crontab user: If you'd prefer the file to be created in the user's home directory, you could set the cronjob to run as "username" instead of root. However, this might have implications for permissions and security, so consider it carefully.
-Explicitly set working directory: Within the crontab entry, you could specify the working directory using cd /var/users/home/username before the script execution. However, this approach might make the crontab configuration less portable if the script's location changes.
-Important reminder:
-
-Granting full permissions to a file via chmod 777 is generally a security risk as it allows anyone to read, write, and execute the file. Use more restrictive permissions whenever possible.
+After your edited the crontab, restart the cron service: `sudo systemctl restart crond`
