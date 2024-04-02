@@ -1,4 +1,4 @@
 TOKEN="qmgzvBsRJi2QBRE1RmPspYcwt48X"
-DOMAINS=(kopen.at)
-OLD_IPv4="778.87.7"
-OLD_IPv6="2a01:c22:8c489200:f5e7:b066:a414:dd0f"
+DOMAINS=(example.com example.de)
+OLD_IPv4="0.0.0.0"
+OLD_IPv6="::::::0000"
